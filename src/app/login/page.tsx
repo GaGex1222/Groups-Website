@@ -10,7 +10,6 @@ import { useFormState } from "react-dom";
 
 
 export default function Home(){
-  const {data: session, status} = useSession();
   const [lastResult, action] = useFormState(login, undefined)
   const [form, fields] = useForm({
     lastResult,

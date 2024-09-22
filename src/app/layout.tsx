@@ -2,7 +2,6 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { League_Spartan } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
-import { CustomSessionProvider } from "@/components/CustomSessionProvider";
 import { auth } from "@/auth";
 
 const robotoFont =  League_Spartan({
