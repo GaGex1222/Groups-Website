@@ -4,7 +4,6 @@ import { login } from "@/actions/user";
 import { loginSchema } from "@/schemas/loginSchema";
 import { useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useFormState } from "react-dom";
 

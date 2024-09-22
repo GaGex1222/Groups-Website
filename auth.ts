@@ -1,9 +1,8 @@
 
 const argon2 = require("argon2")
-import mysql from 'mysql2/promise'
 import { RowDataPacket } from "mysql2/promise";
 import connectDb from "./actions/dbConnection";
-import NextAuth, { CredentialsSignin } from "next-auth"
+import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
