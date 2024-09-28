@@ -13,12 +13,11 @@ export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
-  const session = await auth()
+}>){
   return (
     <html lang="en">
-      <body className="bg-white">
-        <SessionProvider session={session}>
+      <body className="bg-gradient-to-b scroll-smooth from-[#3795BD] min-h-screen">
+        <SessionProvider>
           <div className={robotoFont.className}>
             <Navbar />
             {children}
