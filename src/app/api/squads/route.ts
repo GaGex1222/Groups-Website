@@ -2,8 +2,7 @@ import { NextRequest } from "next/server";
 import { db } from "@/src/db";
 import { groupsTable } from "@/src/db/schema";
 import { NextResponse } from "next/server";
-import { asc, like, max } from "drizzle-orm";
-import { usersTable } from "@/src/db/schema";
+import { asc, like } from "drizzle-orm";
 import { count } from "drizzle-orm";
 import { or } from "drizzle-orm";
 export async function POST(req: NextRequest){
@@ -41,6 +40,6 @@ export async function POST(req: NextRequest){
         })
     } catch (error) {
         console.log("Error when fetching squads:", error)
-        return;
+        return NextResponse.json({error: "Error when fetching squads"});
     }
 }

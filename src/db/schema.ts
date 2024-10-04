@@ -19,7 +19,8 @@ export const groupsTable = sqliteTable('groups', {
   ownerId: integer('owner_id'),
   players: text('players'),
   game: text('game'),
-  maxPlayers: integer('maxPlayers')
+  maxPlayers: integer('maxPlayers'),
+  date: text('date') // added this
 
 })
 

@@ -14,11 +14,6 @@ export default function RegisterPage(){
     const initialState = {
       error: undefined,
     }
-    const {data: session} = useSession()
-    const router = useRouter();
-    if (session) {
-      router.push('/')
-    }
     const [formState, formAction] = useFormState(register, initialState)
     const [form, fields] = useForm({
       formState,

@@ -61,11 +61,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider === "Google" || account?.provider === "github") {
+      console.log("Provided", account?.provider)
+      if (account?.provider === "google" || account?.provider === "github") {
         // Get the user's email
         const email = user.email;
         try{
           const userExists = await db.select().from(usersTable).where(eq(usersTable.email, email as string)).limit(1);
+          console.log(userExists)
           if (!userExists.length){
             await db.insert(usersTable).values({
               email: email as string,

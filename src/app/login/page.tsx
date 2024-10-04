@@ -13,7 +13,6 @@ import GoogleSignInButton from "@/components/GoogleSignInButton";
 
 
 export default function Home(){
-  const router = useRouter();
   const [lastResult, action] = useFormState(login, {
     error: undefined,
   })

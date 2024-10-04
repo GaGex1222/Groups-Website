@@ -29,11 +29,15 @@ async function login(prevState: unknown, formData: FormData){
         })
         if (result?.error) {
             console.log(result?.error)
-            return {error: "Incorrect credentials"};
+            return {
+                error: "Incorrect credentials"
+            };
         }
     } catch (error) {
         console.log("error occured", error)
-        return { error: "Incorrect Credentials" };
+        return { 
+            error: "Error occured when logging in, try again later." 
+        };
     }
 
     redirect('/')
@@ -53,9 +57,16 @@ async function register(prevState: unknown, formData: FormData){
     try{
         const hashedPassword = await argon2.hash(password)
         const emailExists = await db.select().from(usersTable).where(eq(usersTable.email, email as string)).limit(1)
+        const usernameExists = await db.select().from(usersTable).where(eq(usersTable.username, username as string)).limit(1)
         if (emailExists.length > 0){
             return {
                 error: "Email Already Exists, try another one or change password."
+            }
+        }
+
+        if (usernameExists.length > 0){
+            return {
+                error: "Username Already Exists, try another."
             }
         }
         

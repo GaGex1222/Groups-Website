@@ -1,19 +1,19 @@
-
+'use client'
 import Link from 'next/link'
 import React from 'react'
 import Image from 'next/image'
-import { auth, signOut } from '@/auth'
+import { auth } from '@/auth'
+import { signOut, useSession } from 'next-auth/react'
 
 
 
 
 
 
-export const Navbar = async () => {
-    const session = await auth();
-    const handleLogOutAction = async () => {
-        "use server";
-        await signOut()
+export const Navbar = () => {
+    const {data: session} = useSession()
+    const handleLogOutAction = () => {
+        signOut()
     }
     console.log(session)
 
