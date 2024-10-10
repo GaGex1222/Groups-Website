@@ -122,7 +122,7 @@ export default function squadPage({params}: {
     const fetchSquadInfo = async () => {
         setLoading(true)
         try{
-            const response = await fetch('http://localhost:3000/api/squad', {
+            const response = await fetch('http://localhost:3000/api/squads/squad', {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json', 

@@ -23,7 +23,7 @@ export default function Squads() {
     try{
       const response = await fetch('/api/squads', {
         method: "POST",
-          headers: {
+        headers: {
             'Content-Type': 'application/json', // Specify the content type
         },
         body: JSON.stringify({

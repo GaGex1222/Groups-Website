@@ -1,18 +1,56 @@
 
 'use client'
-import { login } from "@/actions/user";
 import { loginSchema } from "@/schemas/loginSchema";
 import { useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
 import { useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useFormState } from "react-dom";
 import GithubSigninButton from "@/components/GithhubSigninButton";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
+import { InvalidCredentialsError, UserNotFoundError } from "@/errors";
+import { useState } from "react";
 
 
 export default function Home(){
+  const router = useRouter()
+  const {data: session} = useSession()
+
+  async function login(prevState: unknown, formData: FormData){
+    console.log("Starting login process...");
+    const email = formData.get("email") as string
+    const password = formData.get("password") as string
+    console.log("Starting login process...");
+
+    const submission = parseWithZod(formData, {
+        schema: loginSchema
+    })
+    if(submission.status !== "success"){
+        return submission.reply();
+    }
+
+    try{
+        const res = await signIn("credentials", {
+            redirect: false,
+            email,
+            password
+        })
+        if(res?.error){
+          if (res.error === 'CredentialsSignin') {
+            return {
+              error: "Invalid Credentials!"
+            }
+          }
+        }
+      } catch (error){
+        return {
+          error: "Error Occured, try again later."
+      }
+    }
+  }
+  
   const [lastResult, action] = useFormState(login, {
     error: undefined,
   })
@@ -25,7 +63,9 @@ export default function Home(){
     shouldValidate: 'onBlur',
     shouldRevalidate: "onInput"
   })
-
+  if(session){
+    router.push('/')
+  }
   return(
     <>
       <div className="flex justify-center items-center h-screen">

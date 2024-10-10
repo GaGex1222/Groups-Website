@@ -6,7 +6,7 @@ import { signIn } from "next-auth/react";
 
 export default function GoogleSignInButton(){
     return(
-        <button onClick={(e) => {e.preventDefault(); signIn('google')}} className="border-2 shadow-md border-[#3795BD] hover:shadow-xl duration-300 hover:-translate-y-1 active:translate-y-0 transform rounded-md w-36 flex justify-center items-center">
+        <button onClick={(e) => {e.preventDefault(); signIn('google', {callbackUrl: '/choose-username'})}} className="border-2 shadow-md border-[#3795BD] hover:shadow-xl duration-300 hover:-translate-y-1 active:translate-y-0 transform rounded-md w-36 flex justify-center items-center">
             <svg className="svgIcon-use" width="25" height="37" viewBox="0 0 25 25">
                 <g fill="none" fillRule="evenodd">
                     <path

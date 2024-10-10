@@ -1,13 +1,17 @@
 
 const argon2 = require("argon2")
+const crypto = require('crypto')
 import { RowDataPacket } from "mysql2/promise";
-import NextAuth from "next-auth"
+import NextAuth, { CredentialsSignin } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import Google from "next-auth/providers/google";
 import github from "next-auth/providers/github";
 import { eq } from "drizzle-orm";
 import { db } from "./src/db";
-import { usersTable } from "./src/db/schema";
+import { groupsTable, usersTable } from "./src/db/schema";
+import { InvalidCredentialsError, UserNotFoundError } from "./errors";
+import { error } from "console";
+import { redirect } from "next/navigation";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -39,14 +43,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               };
               return user;
             } else {
-              return null;
+              throw new InvalidCredentialsError("Invalid Credentials!");
             }
           } else {
-            return null;
+            throw new UserNotFoundError("No user found with this email");
           }
         } catch (error) {
-          console.log("Error occured gal:", error)
-          return null;
+          console.log("Error at auth" ,error)
+          throw error;
         }
       }
     }),
@@ -61,31 +65,45 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async signIn({ user, account }) {
-      console.log("Provided", account?.provider)
+      
       if (account?.provider === "google" || account?.provider === "github") {
-        // Get the user's email
         const email = user.email;
-        try{
+
+        const username = user.name ? user.name : user.username
+
+        console.log("The Provider is ", account.provider, "The username is ", username)
+        
+      try{
           const userExists = await db.select().from(usersTable).where(eq(usersTable.email, email as string)).limit(1);
           console.log(userExists)
           if (!userExists.length){
+            console.log("Doesnt exist, ill add it now to the db")
             await db.insert(usersTable).values({
               email: email as string,
-              username: user.name,
+              username: '',
               password: ''
             })
-
+          }
+          const userCreated = await db.select().from(usersTable).where(eq(usersTable.email, email as string)).limit(1);
+          if (userCreated[0].username === ''){
+            const token = crypto.randomBytes(20).toString('hex')
+            await db.update(usersTable).set({usernameToken: token}).where(eq(usersTable.email, email as string))
           }
         } catch (error){
           console.error("Error adding Oauth user to db", error);
           return false;
         }
+
+        
       }
       return true
     },
 
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       // Add user info to the token if available
+      if (trigger === 'update' && session?.name){
+        token.name = session.name;
+      }
       if (user) {
         if (user.username){
           token.name = user.username;
@@ -96,7 +114,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async session({ session, token }) {
       // Add token info to the session
-      session.user.name = token.name || null;  
+      const email = session.user.email 
+      const user = await db.select({username: usersTable.username}).from(usersTable).where(eq(usersTable.email, email));
+      if (user[0].username !== ''){
+        console.log("found username, changing from defaukt ", user)
+        session.user.name = user[0].username;
+      } else {
+        console.log("No username found in this email, using defaukt")
+        session.user.name = token.name
+      }
       session.user.userId = token.userId;
       return session;
     },

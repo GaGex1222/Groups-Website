@@ -6,6 +6,7 @@ import { parseWithZod } from "@conform-to/zod";
 import { registerSchema } from "@/schemas/registerSchema";
 import { db } from "@/src/db";
 import { usersTable } from "@/src/db/schema";
+import { InvalidCredentialsError, UserNotFoundError } from "@/errors";
 import { eq } from "drizzle-orm";
 const argon2 = require('argon2')
 
@@ -22,25 +23,27 @@ async function login(prevState: unknown, formData: FormData){
     }
 
     try{
-        const result = await signIn("credentials", {
+        await signIn("credentials", {
             redirect: false,
             email,
             password
         })
-        if (result?.error) {
-            console.log(result?.error)
-            return {
-                error: "Incorrect credentials"
-            };
-        }
     } catch (error) {
-        console.log("error occured", error)
+        if (error instanceof InvalidCredentialsError){
+            console.log("Error occrfhehured", error)
+            return {
+                error: "Invalid Credentials!"
+            }
+        } else if (error instanceof UserNotFoundError){
+            return {
+                error: "No User Found With This Email!"
+            }
+        }
         return { 
             error: "Error occured when logging in, try again later." 
         };
     }
 
-    redirect('/')
 }
 
 async function register(prevState: unknown, formData: FormData){
@@ -74,7 +77,8 @@ async function register(prevState: unknown, formData: FormData){
         const inseretedUser = await db.insert(usersTable).values({
             email: email,
             username: username,
-            password: hashedPassword
+            password: hashedPassword,
+            usernameToken: ''
         })
         console.log("insereted", inseretedUser)
     } catch (error){

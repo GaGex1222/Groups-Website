@@ -11,6 +11,11 @@ import GoogleSignInButton from "@/components/GoogleSignInButton";
 import GithubSigninButton from "@/components/GithhubSigninButton";
 
 export default function RegisterPage(){
+  const router = useRouter()
+  const {data: session} = useSession()
+    if(session){
+      router.push('/')
+    }
     const initialState = {
       error: undefined,
     }

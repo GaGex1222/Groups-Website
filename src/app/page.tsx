@@ -14,7 +14,7 @@ export default function Home(){
                 <div className="text-center py-20 ">
                     <h1 className="text-8xl text-white font-bold">Your game, Your Teammates.</h1>
                     <p className="mt-8 text-white duration-150 w-[71rem] mx-auto text-xl leading-relaxed ">At Game Squad, we connect gamers with like-minded teammates for a seamless multiplayer experience. </p>
-                    <button className="border-2 shadow-sm rounded-full hover:shadow-xl px-7 bg-[#3795BD] hover:text-black hover:-translate-y-1 active:translate-y-0 transform duration-300 hover:bg-white  border-[#3795BD] text-white py-3 mt-16" onClick={() => {router.push("/register")}}>
+                    <button className="border-2 shadow-sm rounded-full hover:shadow-xl px-7 bg-[#3795BD] hover:text-black hover:-translate-y-1 active:translate-y-0 transform duration-300 hover:bg-white  border-[#3795BD] text-white py-3 mt-16" onClick={() => {session ? router.push("/squads") : router.push("/register")}}>
                         Get Started
                     </button>
                 </div>
