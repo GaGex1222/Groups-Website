@@ -30,14 +30,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
           const userFromDb = await db.select().from(usersTable).where(eq(usersTable.email, email as string)).limit(1)
           if (userFromDb.length > 0) {
-            const userId = userFromDb[0].id
             const userUsername = userFromDb[0].username
             const userPassword = userFromDb[0].password
             const userEmail = userFromDb[0].email
             const passwordMatch = await argon2.verify(userPassword, password)
             if (passwordMatch) {
               user = {
-                userId: userId,
                 username: userUsername as string | null,
                 email: userEmail as string | null
               };
@@ -105,9 +103,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.name = session.name;
       }
       if (user) {
-        if (user.username){
+        if (user.username || user.name){
+          const userEmail = user.email
+          const userFromDb = await db.select().from(usersTable).where(eq(usersTable.email, userEmail as string)).limit(1)
           token.name = user.username;
-          token.userId = user.userId;
+          token.userId = userFromDb[0].id; 
         } 
       }
       return token;

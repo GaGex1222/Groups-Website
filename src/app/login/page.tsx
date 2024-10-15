@@ -19,10 +19,8 @@ export default function Home(){
   const {data: session} = useSession()
 
   async function login(prevState: unknown, formData: FormData){
-    console.log("Starting login process...");
     const email = formData.get("email") as string
     const password = formData.get("password") as string
-    console.log("Starting login process...");
 
     const submission = parseWithZod(formData, {
         schema: loginSchema

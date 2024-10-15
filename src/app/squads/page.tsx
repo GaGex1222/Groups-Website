@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
+import { useSession } from "next-auth/react";
 
 
 export default function Squads() {
@@ -11,11 +12,29 @@ export default function Squads() {
   const pageParam = urlParams.get('page') ?? 1
   const limitParam = urlParams.get('limit') ?? 5
   let searchParam = urlParams.get('search') ?? ''
+  const {data: session} = useSession();
   const [squads, setSquads] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [maxPages, setMaxPages] = useState(0);
+  const [onlyMySquads, setOnlyMySquads] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false)
+  const [notLoggedInError, setNotLoggedInError] = useState(false);
   if(!searchParam){
     router.push(`/squads?page=${pageParam}&limit=${limitParam}`)
+  }
+
+  const handleOnlyMySquadsFilter = () => {
+    if(session){
+      setLoggedIn(true)
+    }
+    if(loggedIn){
+      setOnlyMySquads(true)
+      fetchSquads()
+    } else {
+      console.log("Not Logged in, errorr puttin now")
+      setNotLoggedInError(true)
+    }
+    console.log("Par Squad", onlyMySquads)
   }
 
   const fetchSquads = async () => {
@@ -29,7 +48,9 @@ export default function Squads() {
         body: JSON.stringify({
           pageParam,
           limitParam,
-          searchParam
+          searchParam,
+          onlyMySquads: onlyMySquads,
+          userId: session?.user.userId
         })
       })
   
@@ -63,6 +84,14 @@ export default function Squads() {
       }
     }
   }, [maxPages])
+
+  useEffect(() => {
+    if(notLoggedInError){
+      setTimeout(() => {
+        setNotLoggedInError((prev) => prev = false)
+      }, 3000)
+    }
+  }, [notLoggedInError])
 
   const handlePreviousPageAction = () => {
     if (Number(pageParam) > 1){
@@ -105,8 +134,13 @@ export default function Squads() {
             </svg>
           </button>
         </form>
-        {/* Button */}
-        <button className="bg-[#3795BD] text-white py-2 px-4 rounded-md hover:-translate-y-1 transform hover:shadow-md duration-300">
+        <div className="flex flex-col">
+        {notLoggedInError && <p className="text-red-500 text-center">You have to be logged in</p>}
+          <button onClick={handleOnlyMySquadsFilter} className="bg-[#3795BD] text-white py-2 px-4 rounded-md hover:-translate-y-1 transform hover:shadow-md duration-300">
+            Only My Squads
+          </button>
+        </div>
+        <button onClick={() => router.push('/create-squad')} className="bg-[#3795BD] text-white py-2 px-4 rounded-md hover:-translate-y-1 transform hover:shadow-md duration-300">
           Create Squad
         </button>
       </div>

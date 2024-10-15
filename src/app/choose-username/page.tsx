@@ -21,7 +21,6 @@ export default function ChooseUsername(){
         message: ''
     })
     const chooseUsernameSubmit = async (prevState: unknown, formData: FormData) => {
-        console.log("enterrd funci")
         const email = session?.user.email
         const usernameEntered = formData.get("username")
         
