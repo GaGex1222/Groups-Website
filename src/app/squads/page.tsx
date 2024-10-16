@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { useSession } from "next-auth/react";
+import { handleErrorToast } from "@/src/toastFunctions";
 
 
 export default function Squads() {
@@ -12,34 +13,31 @@ export default function Squads() {
   const pageParam = urlParams.get('page') ?? 1
   const limitParam = urlParams.get('limit') ?? 5
   let searchParam = urlParams.get('search') ?? ''
-  const {data: session} = useSession();
+  const {data: session, status} = useSession();
   const [squads, setSquads] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [maxPages, setMaxPages] = useState(0);
   const [onlyMySquads, setOnlyMySquads] = useState(false)
   const [loggedIn, setLoggedIn] = useState(false)
-  const [notLoggedInError, setNotLoggedInError] = useState(false);
   if(!searchParam){
     router.push(`/squads?page=${pageParam}&limit=${limitParam}`)
   }
 
   const handleOnlyMySquadsFilter = () => {
-    if(session){
-      setLoggedIn(true)
-    }
     if(loggedIn){
       setOnlyMySquads(true)
-      fetchSquads()
     } else {
-      console.log("Not Logged in, errorr puttin now")
-      setNotLoggedInError(true)
+      handleErrorToast("You have to be logged in to use this feature!")
     }
     console.log("Par Squad", onlyMySquads)
   }
 
+
   const fetchSquads = async () => {
     setLoading(true)
     try{
+      const userId = session?.user.userId
+      console.log("UserId in fetchSquds", userId)
       const response = await fetch('/api/squads', {
         method: "POST",
         headers: {
@@ -70,7 +68,7 @@ export default function Squads() {
 
   useEffect(() => {
     fetchSquads()
-  }, [limitParam, pageParam, searchParam])
+  }, [limitParam, pageParam, searchParam, onlyMySquads])
 
   useEffect(() => {
 
@@ -85,13 +83,16 @@ export default function Squads() {
     }
   }, [maxPages])
 
+
   useEffect(() => {
-    if(notLoggedInError){
-      setTimeout(() => {
-        setNotLoggedInError((prev) => prev = false)
-      }, 3000)
+    if(status === "loading"){
+      return;
     }
-  }, [notLoggedInError])
+
+    if(session){
+      setLoggedIn(true)
+    }
+  }, [status])
 
   const handlePreviousPageAction = () => {
     if (Number(pageParam) > 1){
@@ -116,17 +117,16 @@ export default function Squads() {
   
   return(
 <div className="flex justify-center items-center mt-10">
-  <div className="bg-white w-[70rem] h-[40rem] rounded-md shadow-2xl border-2 border-black">
-    <div className="p-4 flex justify-between items-center">
+  <div className="bg-white w-[70rem] h-[40rem] rounded-xl shadow-xl">
+    <div className="p-4 flex justify-evenly items-center">
         {/* Title */}
-        <h1 className="text-5xl font-bold">Squads Available</h1>
-        <button onClick={fetchSquads}><Image alt="loop button" src={'/logo/icons8-restart.svg'} width={25} height={25}></Image></button>
+        <h1 className="text-5xl text-[#3795BD] font-bold">Squads Available</h1>
         <form onSubmit={handleSearchSubmit} className="relative">
           <input
             name="search"
             id="search"
             placeholder="Name Or Game..."
-            className="border-2 border-black rounded-xl p-2 pr-12 focus:outline-none focus:border-[#3795BD] transform duration-300 w-full"
+            className="border-2 rounded-xl p-2 pr-12 focus:outline-none focus:border-[#3795BD] transform duration-300 w-full"
           />
           <button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-transparent mr-1">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6 text-[#3795BD]">
@@ -134,13 +134,13 @@ export default function Squads() {
             </svg>
           </button>
         </form>
+        <button onClick={() => fetchSquads()}><Image alt="loop button" className="hover:-translate-y-1 duration-300 transform" src={'/logo/icons8-restart.svg'} width={25} height={25}></Image></button>
         <div className="flex flex-col">
-        {notLoggedInError && <p className="text-red-500 text-center">You have to be logged in</p>}
           <button onClick={handleOnlyMySquadsFilter} className="bg-[#3795BD] text-white py-2 px-4 rounded-md hover:-translate-y-1 transform hover:shadow-md duration-300">
             Only My Squads
           </button>
         </div>
-        <button onClick={() => router.push('/create-squad')} className="bg-[#3795BD] text-white py-2 px-4 rounded-md hover:-translate-y-1 transform hover:shadow-md duration-300">
+        <button onClick={() => {session ? router.push('/create-squad') : handleErrorToast("You have to be logged in to use this feature!")}} className="bg-[#3795BD] text-white py-2 px-4 rounded-md hover:-translate-y-1 transform hover:shadow-md duration-300">
           Create Squad
         </button>
       </div>
@@ -159,7 +159,7 @@ export default function Squads() {
         const playersCount = JSON.parse(squad.players).players.length
         return(
           <ul className="space-y-2" key={squad.id}>
-            <li className="p-4 border-b hover:bg-[#3795BD] transition-colors duration-300 flex hover:cursor-pointer" onClick={() => router.push(`/squads/${squad.id}`)}>
+            <li className="p-4 border-b hover:bg-[#3795BD] transition-colors duration-300 flex hover:cursor-pointer" onClick={() => {session ? router.push(`/squads/${squad.id}`) : handleErrorToast("You have to be logged in to use this feature!")}}>
               <h3 className="text-lg font-semibold flex-1 text-center">{squad.name}</h3>
               <h3 className="text-lg font-semibold flex-1 text-center">{squad.game}</h3>
               <h3 className="text-lg font-semibold flex-1 text-center">{playersCount}/{squad.maxPlayers}</h3>

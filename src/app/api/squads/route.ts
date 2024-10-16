@@ -42,7 +42,7 @@ export async function POST(req: NextRequest){
                         .where(eq(groupsTable.ownerId, userId))
                         .limit(Number(limitParam))
                         .offset(offset)
-                        squadsCount = await db.select({count: count()}).from(groupsTable)
+                        squadsCount = await db.select({count: count()}).from(groupsTable).where(eq(groupsTable.ownerId, userId))
             } else {
             squads = await db 
                 .select()
@@ -56,6 +56,7 @@ export async function POST(req: NextRequest){
         }
         console.log("SQUADSSS",squads)
         if (squadsCount){
+            console.log("Squds count" ,squadsCount)
             maxPages = Math.ceil(squadsCount[0]["count"] / limitParam)
         }
         console.log("MaxPages", maxPages)

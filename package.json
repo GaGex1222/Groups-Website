@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/react": "^2.10.2",
     "@conform-to/react": "^1.2.2",
     "@conform-to/zod": "^1.2.2",
     "@emotion/react": "^11.13.3",
@@ -29,6 +30,8 @@
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.53.0",
+    "react-hot-toast": "^2.4.1",
+    "react-toastify": "^10.0.6",
     "zod": "^3.23.8"
   },
   "devDependencies": {

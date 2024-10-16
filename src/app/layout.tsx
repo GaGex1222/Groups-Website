@@ -1,11 +1,11 @@
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
-import { League_Spartan } from "next/font/google";
+import { Roboto } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
-import { auth } from "@/auth";
+import { Toaster } from "react-hot-toast";
 
-const robotoFont =  League_Spartan({
-  weight: ["700"],
+const robotoFont =  Roboto({
+  weight: ["500"],
   subsets: [],
 });
 
@@ -23,6 +23,7 @@ export default async function RootLayout({
             {children}
           </div>
         </SessionProvider>
+        <Toaster/>
       </body>
     </html>
   );

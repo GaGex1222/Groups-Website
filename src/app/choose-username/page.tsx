@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react";
 import { useFormState } from "react-dom"
 import { usernameSchema } from "@/schemas/usernameSchema";
+import { handleErrorToast } from "@/src/toastFunctions";
 
 
 export default function ChooseUsername(){
@@ -16,10 +17,6 @@ export default function ChooseUsername(){
     const {data: session, status, update} = useSession();
     const [usernameToken, setUsernameToken] = useState('')
     const [loading, setLoading] = useState(false)
-    const [choosingError, setChoosingError] = useState({
-        state: false,
-        message: ''
-    })
     const chooseUsernameSubmit = async (prevState: unknown, formData: FormData) => {
         const email = session?.user.email
         const usernameEntered = formData.get("username")
@@ -37,10 +34,7 @@ export default function ChooseUsername(){
         })
         const data = await res.json()
         if(data.error){
-            setChoosingError({
-                state: true,
-                message: data?.error
-            })
+            handleErrorToast(data?.error)
         }
         if (data.result === "success") {
             await update({ name: usernameEntered })
@@ -48,18 +42,12 @@ export default function ChooseUsername(){
                     router.push('/');
                 })
                 .catch((error) => {
-                    setChoosingError({
-                        state: true,
-                        message: `Failed to update session: ${error.message}`
-                    });
+                    handleErrorToast(`Failed to update session: ${error.message}`)
                 });
         }
     }
-    const [lastResult, action] = useFormState(chooseUsernameSubmit, {
-        error: undefined,
-      })
+    const [lastResult, action] = useFormState(chooseUsernameSubmit, undefined)
       const [form, fields] = useForm({
-        lastResult,
     
         onValidate({formData}) {
           return parseWithZod(formData, {schema: usernameSchema})
@@ -102,34 +90,23 @@ export default function ChooseUsername(){
         }
     }, [status])
     
-    useEffect(() => {
-        setTimeout(() => {
-            if(choosingError.state){
-                setChoosingError({
-                    state: false,
-                    message: ''
-                })
-            }
-        }, 3000)
-    }, [choosingError])
 
     return(
         <div className="flex justify-center items-center h-screen">
-            <div className="w-[40rem] h-[18rem] p-8 shadow-md flex flex-col bg-white border-2 border-black rounded-md">
-                <h1 className="text-center text-3xl">Choose Username</h1>
-                <p className="text-center text-gray-800">Because you signed in with third-party app you have to choose username</p>
-                {choosingError.state && <p className="text-center text-red-600">{choosingError.message}</p>}
+            <div className="w-[40rem] h-[18rem] p-8 shadow-md flex flex-col bg-white rounded-md">
+                <h1 className="text-center text-3xl text-[#3795BD]">Choose Username</h1>
+                <p className="text-center text-gray-800">Because you signed in with a third-party app, you have to choose a username</p>
                 <form className="mt-2 flex flex-col items-center" action={action} id={form.id} onSubmit={form.onSubmit}>
-                <label className="text-center mt-2 mb-2" htmlFor="username">Username</label>
+                    <label className="text-center mt-2 mb-2 text-[#3795BD]" htmlFor="username">Username</label>
                     <input
                         name={fields.username.name}
-                        className="border-2 text-center border-black rounded-md mb-4 p-2"
+                        className="border-2 text-center border-[#3795BD] rounded-md mb-4 p-2"
                         style={{ maxWidth: '20rem', width: '100%' }}
                     />
                     
                     <button
                         type="submit"
-                        className="border-2 border-black rounded-md text-center duration-300 p-2"
+                        className="border-2 border-[#3795BD] rounded-md text-center duration-300 p-2 transform hover:-translate-y-1 bg-white text-[#3795BD] hover:bg-[#3795BD] hover:text-white"
                         style={{ maxWidth: '10rem', width: '100%' }}
                     >
                         Submit
