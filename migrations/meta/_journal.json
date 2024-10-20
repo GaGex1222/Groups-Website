@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1727359175975,
-      "tag": "0000_flowery_nico_minoru",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1727631892397,
-      "tag": "0001_vengeful_grim_reaper",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1727996941905,
-      "tag": "0002_aspiring_alice",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1728256777915,
-      "tag": "0003_majestic_power_pack",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1728573487497,
-      "tag": "0004_freezing_mole_man",
+      "when": 1729270438061,
+      "tag": "0000_ordinary_dracula",
       "breakpoints": true
     }
   ]

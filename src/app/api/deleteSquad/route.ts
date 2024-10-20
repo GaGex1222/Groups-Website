@@ -1,5 +1,5 @@
 import { db } from "@/src/db";
-import { groupsTable } from "@/src/db/schema";
+import { groupsTable, usersToGroups } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -11,6 +11,7 @@ export async function POST(req: NextRequest){
         const squad = await db.select().from(groupsTable).where(eq(groupsTable.id, squadId))
         if(squad.length > 0 && userId === squad[0].ownerId){
             await db.delete(groupsTable).where(eq(groupsTable.id, squadId))
+            await db.delete(usersToGroups).where(eq(usersToGroups.squadId, squadId))
         } else {
             return NextResponse.json({ result: "User is not the owner or the squad is not found" }, {status: 500})
         }

@@ -4,10 +4,14 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { useSession } from "next-auth/react";
-import { handleErrorToast } from "@/src/toastFunctions";
+import { handleErrorToast, handleSuccesToast } from "@/src/toastFunctions";
 
 
 export default function Squads() {
+  interface SquadPlayers {
+    squadId: number,
+    players: string[]
+  }
   const urlParams = useSearchParams()
   const router = useRouter()
   const pageParam = urlParams.get('page') ?? 1
@@ -19,13 +23,22 @@ export default function Squads() {
   const [maxPages, setMaxPages] = useState(0);
   const [onlyMySquads, setOnlyMySquads] = useState(false)
   const [loggedIn, setLoggedIn] = useState(false)
+  const [allPlayers, setAllPlayers] = useState<SquadPlayers[]>([])
   if(!searchParam){
     router.push(`/squads?page=${pageParam}&limit=${limitParam}`)
   }
 
   const handleOnlyMySquadsFilter = () => {
     if(loggedIn){
-      setOnlyMySquads(true)
+      const mySquadsCheckbox = document.getElementById('onlyMySquads') as HTMLInputElement;
+      const isChecked: boolean = mySquadsCheckbox.checked;
+      if(isChecked){
+        handleSuccesToast("Checking only for your squads!")
+        setOnlyMySquads(true)
+      } else {
+        handleSuccesToast("Checking for all squads!")
+        setOnlyMySquads(false)
+      }
     } else {
       handleErrorToast("You have to be logged in to use this feature!")
     }
@@ -53,9 +66,10 @@ export default function Squads() {
       })
   
       if (response.ok){
-        const {squads, maxPages} = await response.json()
+        const {squads, maxPages, allPlayers} = await response.json()
         setMaxPages(maxPages)
         setSquads(squads);
+        setAllPlayers(allPlayers);
     } else {
       console.error('Error fetching squads:', response.statusText);
     }
@@ -135,10 +149,9 @@ export default function Squads() {
           </button>
         </form>
         <button onClick={() => fetchSquads()}><Image alt="loop button" className="hover:-translate-y-1 duration-300 transform" src={'/logo/icons8-restart.svg'} width={25} height={25}></Image></button>
-        <div className="flex flex-col">
-          <button onClick={handleOnlyMySquadsFilter} className="bg-[#3795BD] text-white py-2 px-4 rounded-md hover:-translate-y-1 transform hover:shadow-md duration-300">
-            Only My Squads
-          </button>
+        <div className="flex flex-col items-center mt-4">
+          <label htmlFor="onlyMySquads" className="cursor-pointer text-lg text-gray-700">Show only my squads</label>
+          <input id="onlyMySquads" className="cursor-pointer" type="checkbox" onChange={handleOnlyMySquadsFilter}/>
         </div>
         <button onClick={() => {session ? router.push('/create-squad') : handleErrorToast("You have to be logged in to use this feature!")}} className="bg-[#3795BD] text-white py-2 px-4 rounded-md hover:-translate-y-1 transform hover:shadow-md duration-300">
           Create Squad
@@ -152,17 +165,16 @@ export default function Squads() {
         <h3 className="text-lg font-semibold flex-1 text-center p-4">Players</h3>
         <h3 className="text-lg font-semibold flex-1 text-center p-4">Date</h3>
       </div>
-
-  
       
       {squads.length > 0 && squads.map((squad) => {
-        const playersCount = JSON.parse(squad.players).players.length
+        const allPlayersOfSquad = allPlayers.filter((item) => item.squadId === squad.id)
+        console.log("allPlayersOfSquad ", allPlayers )
         return(
           <ul className="space-y-2" key={squad.id}>
             <li className="p-4 border-b hover:bg-[#3795BD] transition-colors duration-300 flex hover:cursor-pointer" onClick={() => {session ? router.push(`/squads/${squad.id}`) : handleErrorToast("You have to be logged in to use this feature!")}}>
               <h3 className="text-lg font-semibold flex-1 text-center">{squad.name}</h3>
               <h3 className="text-lg font-semibold flex-1 text-center">{squad.game}</h3>
-              <h3 className="text-lg font-semibold flex-1 text-center">{playersCount}/{squad.maxPlayers}</h3>
+              <h3 className="text-lg font-semibold flex-1 text-center">{allPlayersOfSquad[0].players.length}/{squad.maxPlayers}</h3>
               <h3 className="text-lg font-semibold flex-1 text-center">{squad.date}</h3>
             </li>
           </ul>

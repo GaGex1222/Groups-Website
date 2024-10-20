@@ -1,15 +1,20 @@
 import { NextRequest } from "next/server";
 import { db } from "@/src/db";
-import { groupsTable } from "@/src/db/schema";
+import { groupsTable, usersToGroups, usersTable } from "@/src/db/schema";
 import { NextResponse } from "next/server";
 import { asc, eq, like } from "drizzle-orm";
 import { count } from "drizzle-orm";
 import { or } from "drizzle-orm";
 export async function POST(req: NextRequest){
     const { pageParam, limitParam, searchParam, onlyMySquads, userId } = await req.json();
-    let squads;
+    let squads: any;
     let squadsCount;
     let maxPages;
+    interface SquadPlayers {
+        squadId: number,
+        players: string[];
+    }
+    const allPlayers: SquadPlayers[] = []
     try{
         const offset = (pageParam - 1) * limitParam;
         if(searchParam){
@@ -54,16 +59,39 @@ export async function POST(req: NextRequest){
             }
 
         }
-        console.log("SQUADSSS",squads)
         if (squadsCount){
-            console.log("Squds count" ,squadsCount)
             maxPages = Math.ceil(squadsCount[0]["count"] / limitParam)
         }
-        console.log("MaxPages", maxPages)
-        console.log(maxPages)
+        const fetchAllPlayers = async () => {
+            const results = await Promise.all(
+                squads.map(async (squad: any) => {
+                    const players = await db
+                        .select()
+                        .from(usersToGroups)
+                        .leftJoin(usersTable, eq(usersTable.id, usersToGroups.userId))
+                        .where(eq(usersToGroups.squadId, squad.id));
+        
+                    const usernameOfPlayers: string[] = players.map((player) => player.users?.username as string);
+        
+                    return {
+                        squadId: squad.id,
+                        players: usernameOfPlayers,
+                    };
+                })
+            );
+        
+            results.forEach(result => {
+                allPlayers.push(result);
+            });
+    
+        };
+        
+        await fetchAllPlayers();
+
         return NextResponse.json({
             squads: squads,
-            maxPages: maxPages
+            maxPages: maxPages,
+            allPlayers: allPlayers
         })
     } catch (error) {
         console.log("Error when fetching squads:", error)

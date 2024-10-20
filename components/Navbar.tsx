@@ -26,7 +26,7 @@ export const Navbar = () => {
             <div>
                 <ul className='flex items-center gap-6'>
                     <li>
-                        <Link className='hover:text-black hover:underline underline-offset-2 duration-300 text-white mb-1' href={"/about"}>About</Link>
+                        <Link className='hover:text-black hover:underline underline-offset-2 duration-300 text-white mb-1' href={"/about-us"}>About</Link>
                     </li>
                     <li>
                         <Link className='hover:text-black hover:underline underline-offset-2 duration-300 text-white mb-1' href={"/login"}>Contact</Link>
